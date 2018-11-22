@@ -32,33 +32,36 @@ module.exports.post = function(data){
 
 module.exports.get = async function(){
     //let post = new Task();
-    let data;
+    let data,status,message;
     await Task.find({})
     .then((docs)=>{
-        console.log('Returning Data',data);
         data = docs;
+        status = 'Ok';
+        message = 'posted';
     })
     .catch((err)=>{
-        console.log(err)
+        status = 'Failed'
+        message = err;
     }); 
-    console.log('I am getting executed');
-    return data;
+    
+    return {'data':data,'status':status,'message':message};
 }
 
 module.exports.update = async function(data){
     let conditions = { id: data['id'] }
-        , update = { task: data['task'],parentTask: data['parentTask'],startDate: data['startDate'], endDate : data['endDate'],complete: data['complete'],priority: data['priority']}
+        , update = data['update']
         , options = { multi: true };
-        console.log(data);
-    await Task.update(conditions, update, options, (err,numAffected) => {
+        console.log('update',data);
+    await Task.findByIdAndUpdate(data['id'],{$set:update} ,  (err,doc) => {
+        console.log(err,doc);
         if (err) {
             status = 'Err ' + err
         }else {
             status = 'Ok'
-            numOfRowsUpdated = numAffected
+            document = doc
         }
 
     });
 
-    return {'numOfRowsUpdated':numOfRowsUpdated,'status':status}
+    return {'document':document,'status':status}
 }
